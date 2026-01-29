@@ -15,6 +15,7 @@ let velocityY = 0;
 let onGround = true;
 let facingRight = true;
 let gameOver = false; 
+let startTime = Date.now(); 
 
 // Load two images
 const pyramidLeft = new Image();
@@ -42,7 +43,7 @@ window.addEventListener("keydown", e => keys[e.key] = true);
 window.addEventListener("keyup", e => keys[e.key] = false);
 
 window.addEventListener("keydown", e => {
-  if (e.code === "Space" && onGround) {
+  if (e.code === "ArrowUp" && onGround) {
     velocityY = -10;
     onGround = false;
   }
@@ -57,7 +58,8 @@ function update() {
 
   if (Date.now() - lastMoveTime >= idleLimit) {
     gameOver = true; 
-    alert("Game Over! You were idling for 5 seconds!"); 
+    const elapsedTime = (Date.now() - startTime) / 1000;
+    alert(`Game Over you lazy bum! You were idling for 5 seconds!\nYou exercised for ${elapsedTime.toFixed(2)} seconds.`);
     return; 
   }
   // Horizontal movement
@@ -73,7 +75,7 @@ function update() {
     lastMoveTime = Date.now(); 
   }
 
-  if (keys["Space"]) {
+  if (keys["ArrowUp"]) {
     lastMoveTime = Date.now();
   }
 
