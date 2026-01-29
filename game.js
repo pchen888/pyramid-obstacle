@@ -14,6 +14,7 @@ let pyramidY = groundY - pyramidHeight;
 let velocityY = 0;
 let onGround = true;
 let facingRight = true;
+let gameOver = false; 
 
 // Load two images
 const pyramidLeft = new Image();
@@ -31,6 +32,10 @@ const obstacle = {
 const obstacleImage = new Image();
 obstacleImage.src = "Obstacle.png";
 
+let lastMoveTime = Date.now(); // last time the player moved
+const idleLimit = 5000; // 5000ms = 5 seconds
+
+
 // ---------------- Input ----------------
 const keys = {};
 window.addEventListener("keydown", e => keys[e.key] = true);
@@ -45,16 +50,42 @@ window.addEventListener("keydown", e => {
 
 // ---------------- Update ----------------
 function update() {
+
+  if (gameOver) return;
+
+  // check idle time
+
+  if (Date.now() - lastMoveTime >= idleLimit) {
+    gameOver = true; 
+    alert("Game Over! You were idling for 5 seconds!"); 
+    return; 
+  }
   // Horizontal movement
   let nextX = pyramidX;
   if (keys["ArrowRight"]) {
     nextX += speed;
     facingRight = true;
+    lastMoveTime = Date.now();
   }
   if (keys["ArrowLeft"]) {
     nextX -= speed;
     facingRight = false;
+    lastMoveTime = Date.now(); 
   }
+
+  if (keys["Space"]) {
+    lastMoveTime = Date.now();
+  }
+
+  // ---------------- Prevent leaving canvas horizontally ----------------
+  if (pyramidX < 0) pyramidX = 0;  // left edge
+  if (pyramidX + pyramidWidth > canvas.width) pyramidX = canvas.width - pyramidWidth; 
+
+  if (pyramidY < 0) {
+    pyramidY = 0;      // top edge
+    velocityY = 0;     // stop upward movement
+  }
+  
 
   // Horizontal collision with obstacle
   if (
@@ -66,7 +97,9 @@ function update() {
     if (keys["ArrowRight"]) nextX = obstacle.x - pyramidWidth;
     if (keys["ArrowLeft"]) nextX = obstacle.x + obstacle.width;
   }
-  pyramidX = nextX;
+
+  if (nextX < 0) nextX = 0;
+  if (nextX + pyramidWidth > canvas.width) nextX = canvas.width - pyramidWidth;
 
   // Vertical movement
   velocityY += gravity;
@@ -94,6 +127,8 @@ function update() {
   }
 
   pyramidY = nextY;
+
+  pyramidX = nextX; 
 }
 
 // ---------------- Draw ----------------
